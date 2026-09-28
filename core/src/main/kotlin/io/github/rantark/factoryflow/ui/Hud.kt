@@ -808,7 +808,7 @@ class Hud(private val game: FactoryGame) {
         if (ui.button(x + 176f * u, by, 130f * u, 44f * u, if (game.saves.soundOn) "Sound: On" else "Sound: Off")) {
             game.saves.soundOn = !game.saves.soundOn; game.audio.muted = !game.saves.soundOn; click()
         }
-        ui.text("Seed ${s.factory.world.seed}", x + mw - 16f * u, by + 16f * u, 9f, Theme.DIM, 1)
+        ui.text("Version ${game.platform.versionLabel}  ·  Seed ${s.factory.world.seed}", x + mw - 16f * u, by + 16f * u, 9f, Theme.DIM, 1)
         ui.eatTaps()
     }
 

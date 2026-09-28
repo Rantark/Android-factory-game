@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -16,7 +17,13 @@ val natives: Configuration by configurations.creating
 val keystorePath: String? = System.getenv("FF_KEYSTORE_PATH")
 val hasReleaseKey = !keystorePath.isNullOrBlank() && file(keystorePath).exists()
 
-// CI passes the build number so every published APK has an increasing versionCode.
+// The version lives in version.properties at the repo root (single source of truth).
+val appVersion: String = Properties().apply {
+    rootProject.file("version.properties").inputStream().use { load(it) }
+}.getProperty("version")
+
+// CI passes the run number so every published APK has an increasing versionCode
+// (Android only installs an update if its versionCode is higher).
 val buildNumber = (System.getenv("FF_BUILD_NUMBER") ?: "1").toInt()
 
 android {
@@ -28,7 +35,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = buildNumber
-        versionName = "1.0.$buildNumber"
+        versionName = appVersion
     }
 
     signingConfigs {

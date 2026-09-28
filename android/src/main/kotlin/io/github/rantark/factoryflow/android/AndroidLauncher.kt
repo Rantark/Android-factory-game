@@ -14,7 +14,7 @@ import io.github.rantark.factoryflow.Platform
 import io.github.rantark.factoryflow.game.FactoryGame
 
 /** Rasterises glyphs from the system font with Android's Canvas – no font files shipped. */
-class AndroidPlatform : Platform {
+class AndroidPlatform(override val versionLabel: String) : Platform {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         color = Color.WHITE
@@ -50,6 +50,9 @@ class AndroidLauncher : AndroidApplication() {
             useCompass = false
             useGyroscope = false
         }
-        initialize(FactoryGame(AndroidPlatform()), config)
+        val info = packageManager.getPackageInfo(packageName, 0)
+        @Suppress("DEPRECATION")
+        val label = "${info.versionName} (build ${info.versionCode})"
+        initialize(FactoryGame(AndroidPlatform(label)), config)
     }
 }

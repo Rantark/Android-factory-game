@@ -17,6 +17,11 @@ class DesktopPlatform(private val audio: Boolean) : Platform {
 
     override val audioEnabled get() = audio
 
+    override val versionLabel: String = try {
+        java.util.Properties().apply { java.io.File("../../version.properties").inputStream().use { load(it) } }
+            .getProperty("version") + " (desktop)"
+    } catch (e: Exception) { "dev" }
+
     override fun rasterizeGlyph(ch: Char, px: Int): GlyphBitmap {
         val f = font.deriveFont(px.toFloat())
         val g0 = metricsImg.createGraphics()

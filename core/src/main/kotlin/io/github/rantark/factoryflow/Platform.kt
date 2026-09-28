@@ -24,4 +24,7 @@ interface Platform {
 
     /** Whether to try opening an audio device (false on headless test machines). */
     val audioEnabled: Boolean get() = true
+
+    /** App version shown in the menu, e.g. "1.0.0 (build 12)". */
+    val versionLabel: String get() = "dev"
 }

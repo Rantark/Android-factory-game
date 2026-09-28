@@ -13,12 +13,12 @@ image, sprite, font or audio files**.
 ## Get the game on your phone
 
 1. On your Android phone, open the repository's **Releases** page:
-   `https://github.com/<owner>/<repo>/releases`
+   `https://github.com/Rantark/Android-factory-game/releases`
 2. Tap **`FactoryFlow.apk`** under the newest release. The direct link, which always
    points at the newest build, is:
 
    ```
-   https://github.com/<owner>/<repo>/releases/latest/download/FactoryFlow.apk
+   https://github.com/Rantark/Android-factory-game/releases/latest/download/FactoryFlow.apk
    ```
 3. When the download finishes, tap it. Android will ask you to allow **Install unknown apps** for
    your browser (Settings → Apps → *your browser* → Install unknown apps → Allow).
@@ -33,19 +33,40 @@ Requires Android 8.0 (API 26) or newer. The game plays in landscape.
 
 ---
 
-## Build it yourself with GitHub Actions (no local tools needed)
+## Build & publish (one tap, no local tools)
 
-1. **Fork** this repository (button at the top right on GitHub).
-2. In your fork, open the **Actions** tab and click *"I understand my workflows, enable them"*.
-3. Start a build in either of these ways:
-   - push any commit to `main`, or
-   - **Actions → Build APK → Run workflow** (manual `workflow_dispatch`).
-4. After about 5 minutes the run finishes and:
-   - a **GitHub Release** named `Factory Flow v1.0.<run number>` appears under
-     **Releases**, with `FactoryFlow.apk` (and a versioned copy) attached;
-   - the APK is also attached to the run itself as a downloadable artifact.
+**▶ Build button:** https://github.com/Rantark/Android-factory-game/actions/workflows/build.yml
+→ **Run workflow** → **Run workflow**. (Forked it? Use `https://github.com/<you>/<repo>/actions/workflows/build.yml`.)
 
-Pull requests are built and tested too, but they don't publish a release.
+A build is started by:
+
+- **any push to any branch**, or
+- the **Run workflow** button above.
+
+Each build runs the tests, builds the APK and **publishes a GitHub Release**. The newest
+APK is always at:
+
+```
+https://github.com/Rantark/Android-factory-game/releases/latest/download/FactoryFlow.apk
+```
+
+Pull requests build and test but don't publish.
+
+### Versioning
+
+The version lives in code, in [`version.properties`](version.properties):
+
+```properties
+version=1.0.0
+```
+
+- The release **tag is `v<version>`**, e.g. `v1.0.0`. The app shows the same version in its
+  Menu (for example "1.0.0 (build 7)").
+- To release a new version, change the number (e.g. to `1.1.0`) and push. That publishes `v1.1.0`.
+- If you build again without changing the number, the build is **still published**, as
+  `v1.0.0-build.<run number>`, so a run never fails because a tag already exists.
+- The Android `versionCode` is the workflow run number, so every build installs as an
+  upgrade of the previous one.
 
 ### What the pipeline does (`.github/workflows/build.yml`)
 
@@ -54,8 +75,9 @@ Pull requests are built and tested too, but they don't publish a release.
 | Set up JDK 17 + Android SDK 36 | Uses the SDK preinstalled on `ubuntu-latest` |
 | Gradle with caching | `gradle/actions/setup-gradle` |
 | Unit tests | `./gradlew :core:test`: simulation, placement, save/load, audio levels, render cost |
-| Build | `./gradlew :android:assembleRelease`; `versionCode` = run number |
-| Publish | `softprops/action-gh-release` creates tag `v1.0.<run>` and uploads the APK |
+| Version | Reads `version.properties` → tag `v<version>` (or `v<version>-build.<run>` if taken) |
+| Build | `./gradlew :android:assembleRelease`; `versionName` = version, `versionCode` = run number |
+| Publish | `gh release create` (GitHub CLI, preinstalled) uploads `FactoryFlow.apk`; the run summary shows the links |
 
 ### Release signing (optional, recommended)
 
