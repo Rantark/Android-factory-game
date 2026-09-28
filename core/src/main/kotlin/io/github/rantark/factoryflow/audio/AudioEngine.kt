@@ -131,7 +131,7 @@ class AudioEngine(private val enabled: Boolean) {
         master += (targetMaster - master) * 0.0003f * BUF
     }
 
-    private fun fill(buf: ShortArray) {
+    internal fun fill(buf: ShortArray) {
         biomeTargets()
         while (true) {
             val s = queue.poll() ?: break

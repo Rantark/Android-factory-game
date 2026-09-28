@@ -26,11 +26,10 @@ class Font(platform: Platform) : Disposable {
 
     init {
         val size = 1024
-        val pm = Pixmap(size, size, Pixmap.Format.RGBA8888)
-        pm.blending = Pixmap.Blending.None
-        pm.setColor(0f, 0f, 0f, 0f); pm.fill()
+        // Build the atlas in a plain int array (0xRRGGBBAA) and upload it in one go.
+        val px = IntArray(size * size)
         // White block in the top-left corner for untextured geometry.
-        pm.setColor(1f, 1f, 1f, 1f); pm.fillRectangle(0, 0, 32, 32)
+        for (y in 0 until 32) for (x in 0 until 32) px[y * size + x] = -1
         whiteU = 16f / size; whiteV = 16f / size
 
         var penX = 40; var penY = 2; var rowH = 0
@@ -43,7 +42,7 @@ class Font(platform: Platform) : Disposable {
             if (penY < 36 && penX < 36) penX = 40
             for (yy in 0 until g.h) for (xx in 0 until g.w) {
                 val a = g.alpha[yy * g.w + xx].toInt() and 0xFF
-                if (a != 0) pm.drawPixel(penX + xx, penY + yy, (0xFFFFFF00.toInt()) or a)
+                if (a != 0 && penX + xx < size && penY + yy < size) px[(penY + yy) * size + penX + xx] = (0xFFFFFF00.toInt()) or a
             }
             val glyph = Glyph(
                 penX.toFloat() / size, penY.toFloat() / size,
@@ -54,6 +53,10 @@ class Font(platform: Platform) : Disposable {
             rowH = maxOf(rowH, g.h)
         }
         ascent = asc
+        val pm = Pixmap(size, size, Pixmap.Format.RGBA8888)
+        val buf = pm.pixels.duplicate().order(java.nio.ByteOrder.BIG_ENDIAN)
+        buf.position(0)
+        buf.asIntBuffer().put(px)
         texture = Texture(pm, true)
         texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
         pm.dispose()

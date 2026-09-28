@@ -123,8 +123,8 @@ class Painter {
             BuildingType.MINING_DRILL -> drill(dir, anim, working)
             BuildingType.PUMP_JACK -> pumpJack(anim)
             BuildingType.WATER_PUMP -> waterPump(anim, working)
-            BuildingType.POLE -> pole(false)
-            BuildingType.BIG_POLE -> pole(true)
+            BuildingType.POLE -> pole(false, working)
+            BuildingType.BIG_POLE -> pole(true, working)
             BuildingType.COAL_GEN -> coalGen(b as? CoalGenerator, anim, working)
             BuildingType.SOLAR -> solar()
             BuildingType.ACCUMULATOR -> accumulator(b as? Accumulator)
@@ -399,19 +399,26 @@ class Painter {
 
     // ---- Power ----------------------------------------------------------------------
 
-    private fun pole(big: Boolean) {
+    private fun pole(big: Boolean, powered: Boolean) {
+        // Powered poles pulse softly, like a heartbeat travelling down the line.
+        val pulse = if (powered) 0.55f + 0.45f * sin(time * 3f + (ox + oy) * 0.35f) else 0f
         if (big) {
             circ(0.56f, 0.4f, 0.34f, SHADOW)
             s.ngon(X(0.5f), Y(0.5f), L(0.36f), 4, MathUtils.PI / 4, Col.pack(0x5C6672))
             s.ngon(X(0.5f), Y(0.5f), L(0.26f), 4, MathUtils.PI / 4, Col.pack(0x8894A2))
             ln(0.2f, 0.2f, 0.8f, 0.8f, 0.06f, Col.pack(0x4A525C)); ln(0.2f, 0.8f, 0.8f, 0.2f, 0.06f, Col.pack(0x4A525C))
             circ(0.5f, 0.5f, 0.1f, Col.pack(0x4FC3F7))
+            if (powered) s.glow(X(0.5f), Y(0.5f), L(0.35f), 0x9FE3FF, 0.5f * pulse)
         } else {
             circ(0.56f, 0.42f, 0.22f, SHADOW)
             circ(0.5f, 0.5f, 0.18f, Col.pack(0x5B4636))
             circ(0.5f, 0.5f, 0.13f, Col.pack(0x8B6B4E))
             ln(0.22f, 0.5f, 0.78f, 0.5f, 0.09f, Col.pack(0x4A3A2C))
             circ(0.25f, 0.5f, 0.06f, Col.pack(0x9FD8F5)); circ(0.75f, 0.5f, 0.06f, Col.pack(0x9FD8F5))
+            if (powered) {
+                s.glow(X(0.25f), Y(0.5f), L(0.16f), 0xC8F0FF, 0.7f * pulse)
+                s.glow(X(0.75f), Y(0.5f), L(0.16f), 0xC8F0FF, 0.7f * pulse)
+            }
         }
     }
 
