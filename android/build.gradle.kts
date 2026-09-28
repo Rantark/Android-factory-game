@@ -62,7 +62,9 @@ android {
     }
 
     packaging {
-        resources.excludes += setOf("META-INF/robovm/**")
+        // libGDX bundles a default bitmap font we never use (all text is rasterised at
+        // runtime from the system font), so keep it out of the APK.
+        resources.excludes += setOf("META-INF/robovm/**", "com/badlogic/gdx/utils/lsans-15.*", "com/badlogic/gdx/utils/arial-*")
     }
 }
 
